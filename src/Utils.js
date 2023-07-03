@@ -1,5 +1,3 @@
-
-
 const MAX_LENGTH = 15; 
 const PREFIX_INGREDIENT = 'strIngredient';
 const PREFIX_MEASURE = 'strMeasure';
@@ -23,7 +21,6 @@ export const parseDrinks = (drinks) => {
       cocktails[foundIndex].cpt += 1;
     }
   }
-  console.log(cocktails);
   return cocktails;
 }
 
@@ -37,7 +34,6 @@ function isNumber(str) {
 }
 
 function addIngredients(existingIngredients, newIngredients) {
-  // we assume that existing new ingredients and existing ingredients have the same component
   var resIngredients = [];
   existingIngredients.forEach((element, index) => {
     resIngredients.push(
@@ -50,7 +46,8 @@ function addIngredients(existingIngredients, newIngredients) {
   return resIngredients;
 }
 
-function parseMeasureQuantity(strMeasure) {
+function parseMeasureQuantity(strMeasure) { // 1 1/2 oz => 1,5 oz
+  // 1,5 oz => [1, 1/2, oz] => oz => [1, 1/2], res.measure = oz 
   var res = {measure:"", quantity:0};
   if (strMeasure == null)
       return res;
@@ -62,7 +59,7 @@ function parseMeasureQuantity(strMeasure) {
       return res;
 
   var m = splittedMeasure[splittedMeasure.length - 1];
-  while(splittedMeasure.length != 0 && !isNumber(m))
+  while(splittedMeasure.length !== 0 && !isNumber(m))
   {
       splittedMeasure.pop();
       res.measure = m + " " + res.measure;
@@ -97,7 +94,7 @@ export const parseIngredients = (drink) => {
 }
 
 export const clone = (data) => {
-  return JSON.parse(JSON.stringify(data));
+  return data;
 }
 
 // [{ name: Yogurt Cooler, 

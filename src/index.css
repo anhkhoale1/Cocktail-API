@@ -4,15 +4,9 @@
   /* box-sizing: border-box; */
 }
 
-body {
-  background-color: aqua;
-}
-
 .main-container {
   height: 70px;
-  background-color: antiquewhite;
   text-align: center;
-  margin-top: 100px;
   padding: 10px;
   margin-bottom: 10px;
 }
@@ -34,7 +28,7 @@ body {
 .main-card {
   background-color: white;
   height: 300px;
-  width: 500px;
+  width: 250px;
   padding: 10px;
   display: inline-block;
   margin-right: 20px;
