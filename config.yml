@@ -1,0 +1,30 @@
+version: 2.1
+
+jobs:
+  build:
+    docker:
+      - image: circleci/node:14
+ steps:
+  - checkout
+
+  # Install Babel dependencies
+  - run:
+      name: Install Babel dependencies
+      command: npm install --save-dev @babel/preset-react
+
+  # Install other dependencies
+  - run: npm install
+  
+  # Build the project
+  - run: npm run build 
+      
+      # Run tests
+      - run:
+          name: Run tests
+          command: npm run test
+
+workflows:
+  version: 2
+  build-and-test:
+    jobs:
+      - build
