@@ -1,7 +1,6 @@
 * {
   margin: 0;
   padding: 0;
-  /* box-sizing: border-box; */
 }
 
 .main-container {
@@ -46,7 +45,7 @@
 }
 
 .remove-btn {
-  background-color: rgb(136, 74, 74);
+  background-color: #a5172f;
   width: 150px;
   color: white;
   font-weight: bold;
