@@ -1,11 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { clone, parseDrinks } from "./Utils";
 
 function App() {
   const [cocktails, setCocktails] = useState("");
-  const [result, setResult] = useState("");
   const [cocktailSelected, setCocktailsSelected] = useState([]);
-  const [cocktailsOnList, setCocktailsOnList] = useState("");
 
   const changeHandler = (e) => {
     const letter = e.target.value;
@@ -18,7 +16,7 @@ function App() {
 
   const addOnList = (e) => {
     e.preventDefault();
-    const cocktail_id = e.target.attributes.getNamedItem("cocktail-id").value;
+    const cocktail_id = e.target.id;
     const url =
       "https://www.thecocktaildb.com/api/json/v1/1/lookup.php?i=" + cocktail_id;
     fetch(url)
@@ -31,7 +29,7 @@ function App() {
   };
 
   const removeFromList = (e) => {
-    const cocktailId = e.target.getAttribute("cocktail_id");
+    const cocktailId = e.target.id;
     if (!cocktailId) {
       return;
     }
@@ -47,42 +45,20 @@ function App() {
     setCocktailsSelected([...clonedCocktailSelected]);
   };
 
-  const showCocktails = () => {
-    const data = parseDrinks(cocktailSelected);
-    if (data) {
-      let cocktailsOnList = setCocktailsOnList(cocktailsOnList);
-    }
-  };
-
-  const showResult = (e) => {
-    e.preventDefault();
-    const data = cocktails.drinks;
-    if (data) {
-      let listCocktails = setResult(listCocktails);
-    }
-  };
-
   return (
     <>
-      <h2 style={{ textAlign: "center" }}>TEST NEOFARM</h2>
+      <h2 style={{ textAlign: "center" }}>Cocktails api</h2>
       <div className="main-container">
-        <form onSubmit={showResult}>
-          <div className="search-container">
-            <input
-              type="search"
-              className="search-field"
-              onChange={changeHandler}
-            />
-            <br />
-            <button type="submit" className="submit-btn">
-              {" "}
-              Search Cocktails
-            </button>
-          </div>
-        </form>
+        <div className="search-container">
+          <input
+            type="search"
+            className="search-field"
+            onChange={changeHandler}
+          />
+        </div>
       </div>
       <div style={{ display: "flex", flexDirection: "row" }}>
-        <div style={{ width: '900px'}}>
+        <div style={{ width: "900px" }}>
           {cocktails?.drinks?.map((cocktail) => (
             <div className="main-card" key={cocktail.idDrink}>
               <img
@@ -94,7 +70,7 @@ function App() {
               <h2 className="main-title">{cocktail.strDrink}</h2>
               <button
                 className="add-btn"
-                cocktail-id={cocktail.idDrink}
+                id={cocktail.idDrink}
                 onClick={addOnList}
               >
                 Add
@@ -108,14 +84,14 @@ function App() {
               <h2 className="main-title">
                 <b>{cocktail.name}</b> ({cocktail.cpt}){" "}
               </h2>
-              {cocktail.ingredients.map((ingredient) => (
-                <h2 className="main-ingredient">
+              {cocktail.ingredients.map((ingredient, key) => (
+                <h2 className="main-ingredient" key={key}>
                   {ingredient.name} - {ingredient.quantity} {ingredient.unity}{" "}
                 </h2>
               ))}
               <button
                 className="remove-btn"
-                cocktail_id={cocktail.idDrink}
+                id={cocktail.idDrink}
                 onClick={removeFromList}
               >
                 Remove
