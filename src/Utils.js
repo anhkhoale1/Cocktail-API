@@ -61,7 +61,7 @@ function parseMeasureQuantity(strMeasure) {
   var m = splittedMeasure[splittedMeasure.length - 1];
   while (splittedMeasure.length !== 0 && !isNumber(m)) {
     splittedMeasure.pop();
-    res.measure = m + " " + res.measure;
+    res.measure = m;
     m = splittedMeasure[splittedMeasure.length - 1];
   }
 
