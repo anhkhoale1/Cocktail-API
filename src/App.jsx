@@ -218,6 +218,7 @@ function App() {
         position: 'relative',
         background: `linear-gradient(120deg, #1a237e 0%, #0d47a1 50%, #01579b 100%)`,
         overflow: 'auto',
+        overflowX: 'hidden',
         '&::before': {
           content: '""',
           position: 'absolute',
@@ -249,6 +250,7 @@ function App() {
           bottom: 0,
           background: `linear-gradient(120deg, #1a237e 0%, #0d47a1 50%, #01579b 100%)`,
           zIndex: -1,
+          overflow: 'hidden',
           '&::before': {
             content: '""',
             position: 'absolute',
@@ -262,7 +264,15 @@ function App() {
           }
         }}
       />
-      <Container maxWidth="lg" sx={{ py: 6, position: 'relative', zIndex: 1 }}>
+      <Container 
+        maxWidth="lg" 
+        sx={{ 
+          py: 6, 
+          position: 'relative', 
+          zIndex: 1,
+          px: { xs: 2, sm: 3, md: 4 }
+        }}
+      >
         <Box sx={{ 
           display: 'flex', 
           justifyContent: { xs: 'space-between', md: 'center' }, 
