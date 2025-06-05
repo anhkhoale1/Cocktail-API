@@ -1,106 +1,191 @@
-import { useState } from "react";
-import { clone, parseDrinks } from "./Utils";
+import { useState, useEffect } from "react";
+import { parseDrinks } from "./Utils";
+import {
+  Container,
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  CardMedia,
+  Typography,
+  Button,
+  TextField,
+  Paper,
+  Stack,
+  IconButton
+} from "@mui/material";
+import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
+
+const API_BASE_URL = "https://www.thecocktaildb.com/api/json/v1/1";
 
 function App() {
-  const [cocktails, setCocktails] = useState("");
-  const [cocktailSelected, setCocktailsSelected] = useState([]);
+  const [cocktails, setCocktails] = useState({ drinks: [] });
+  const [selectedCocktails, setSelectedCocktails] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const changeHandler = (e) => {
-    const letter = e.target.value;
-    const url =
-      "https://www.thecocktaildb.com/api/json/v1/1/search.php?f=" + letter;
-    fetch(url)
-      .then((response) => response.json())
-      .then((data) => setCocktails(data));
-  };
-
-  const addOnList = (e) => {
-    e.preventDefault();
-    const cocktail_id = e.target.id;
-    const url =
-      "https://www.thecocktaildb.com/api/json/v1/1/lookup.php?i=" + cocktail_id;
-    fetch(url)
-      .then((response) => response.json())
-      .then((data) =>
-        data.drinks != null && data.length !== 0
-          ? setCocktailsSelected((current) => [...current, data.drinks[0]])
-          : null
+  const fetchRandomCocktails = async () => {
+    setIsLoading(true);
+    try {
+      const randomCocktails = await Promise.all(
+        Array(10).fill().map(() => 
+          fetch(`${API_BASE_URL}/random.php`)
+            .then(res => res.json())
+            .then(data => data.drinks[0])
+        )
       );
+      setCocktails({ drinks: randomCocktails });
+    } catch (error) {
+      console.error('Error fetching random cocktails:', error);
+      setCocktails({ drinks: [] });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const removeFromList = (e) => {
-    const cocktailId = e.target.id;
-    if (!cocktailId) {
+  useEffect(() => {
+    if (!cocktails.drinks.length && !selectedCocktails.length) {
+      fetchRandomCocktails();
+    }
+  }, [cocktails.drinks.length, selectedCocktails.length]);
+
+  const handleSearch = async (e) => {
+    const searchTerm = e.target.value.toLowerCase();
+    if (!searchTerm) {
+      setCocktails({ drinks: [] });
       return;
     }
-    const foundIndex = cocktailSelected.findIndex(
-      (cocktail) => cocktail.idDrink === cocktailId
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/search.php?s=${searchTerm}`);
+      const data = await response.json();
+      setCocktails(data);
+    } catch (error) {
+      console.error('Error searching cocktails:', error);
+      setCocktails({ drinks: [] });
+    }
+  };
+
+  const handleAddCocktail = async (e) => {
+    e.preventDefault();
+    const cocktailId = e.currentTarget.id;
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/lookup.php?i=${cocktailId}`);
+      const data = await response.json();
+      
+      if (data.drinks?.[0]) {
+        setSelectedCocktails(current => [...current, data.drinks[0]]);
+      }
+    } catch (error) {
+      console.error('Error adding cocktail:', error);
+    }
+  };
+
+  const handleRemoveCocktail = (e) => {
+    const cocktailId = e.currentTarget.id;
+    if (!cocktailId) return;
+
+    setSelectedCocktails(current => 
+      current.filter(cocktail => cocktail.idDrink !== cocktailId)
     );
-    if (foundIndex === -1) {
-      return;
-    }
-
-    var clonedCocktailSelected = clone(cocktailSelected);
-    clonedCocktailSelected.splice(foundIndex, 1);
-    setCocktailsSelected([...clonedCocktailSelected]);
   };
+
+  const renderCocktailCard = (cocktail) => (
+    <Grid item xs={12} sm={6} md={4} key={cocktail.idDrink}>
+      <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', boxShadow: 3 }}>
+        <CardMedia
+          component="img"
+          height="180"
+          image={cocktail.strDrinkThumb}
+          alt={cocktail.strDrink}
+        />
+        <CardContent>
+          <Typography variant="h6" gutterBottom>{cocktail.strDrink}</Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            id={cocktail.idDrink}
+            onClick={handleAddCocktail}
+            fullWidth
+          >
+            Add to List
+          </Button>
+        </CardContent>
+      </Card>
+    </Grid>
+  );
+
+  const renderIngredient = (ingredient, key) => (
+    <Typography variant="body2" color="text.secondary" key={key}>
+      • {ingredient.name}
+      {ingredient.quantity && ingredient.quantity !== "0" && ingredient.quantity !== "0 " && ingredient.quantity !== 0 && 
+        ` ${ingredient.quantity}${ingredient.unity ? ` ${ingredient.unity}` : ''}`}
+    </Typography>
+  );
+
+  const renderSelectedCocktail = (cocktail) => (
+    <Card key={cocktail.idDrink} sx={{ p: 2, bgcolor: 'grey.50' }}>
+      <Box display="flex" alignItems="center" justifyContent="space-between">
+        <Box>
+          <Typography variant="subtitle1" fontWeight={600}>
+            {cocktail.name} <Typography variant="caption" color="text.secondary">({cocktail.cpt})</Typography>
+          </Typography>
+          {cocktail.ingredients.map(renderIngredient)}
+        </Box>
+        <IconButton
+          color="error"
+          id={cocktail.idDrink}
+          onClick={handleRemoveCocktail}
+        >
+          <DeleteIcon />
+        </IconButton>
+      </Box>
+    </Card>
+  );
 
   return (
-    <>
-      <h2 style={{ textAlign: "center" }}>Cocktails api</h2>
-      <div className="main-container">
-        <div className="search-container">
-          <input
-            type="search"
-            className="search-field"
-            onChange={changeHandler}
-          />
-        </div>
-      </div>
-      <div style={{ display: "flex", flexDirection: "row" }}>
-        <div style={{ width: "900px" }}>
-          {cocktails?.drinks?.map((cocktail) => (
-            <div className="main-card" key={cocktail.idDrink}>
-              <img
-                src={cocktail.strDrinkThumb}
-                alt="cocktails"
-                height="200"
-                width="200"
-              />
-              <h2 className="main-title">{cocktail.strDrink}</h2>
-              <button
-                className="add-btn"
-                id={cocktail.idDrink}
-                onClick={addOnList}
-              >
-                Add
-              </button>
-            </div>
-          ))}
-        </div>
-        <div>
-          {parseDrinks(cocktailSelected)?.map((cocktail) => (
-            <div className="main-list" key={cocktail.idDrink}>
-              <h2 className="main-title">
-                <b>{cocktail.name}</b> ({cocktail.cpt}){" "}
-              </h2>
-              {cocktail.ingredients.map((ingredient, key) => (
-                <h2 className="main-ingredient" key={key}>
-                  {ingredient.name} - {ingredient.quantity} {ingredient.unity}{" "}
-                </h2>
-              ))}
-              <button
-                className="remove-btn"
-                id={cocktail.idDrink}
-                onClick={removeFromList}
-              >
-                Remove
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
-    </>
+    <Container maxWidth="lg" sx={{ py: 6 }}>
+      <Typography variant="h3" align="center" gutterBottom fontWeight={700} color="primary.main">
+        Cocktail Explorer
+      </Typography>
+      
+      <Box display="flex" justifyContent="center" mb={4}>
+        <TextField
+          label="Search cocktails by name..."
+          variant="outlined"
+          onChange={handleSearch}
+          sx={{ width: 320 }}
+          helperText="Type a cocktail name to search"
+        />
+      </Box>
+
+      <Grid container spacing={4}>
+        <Grid item xs={12} md={8}>
+          <Grid container spacing={3}>
+            {isLoading ? (
+              <Grid item xs={12}>
+                <Typography align="center">Loading suggestions...</Typography>
+              </Grid>
+            ) : (
+              Array.isArray(cocktails?.drinks) && cocktails.drinks.map(renderCocktailCard)
+            )}
+          </Grid>
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <Paper elevation={4} sx={{ p: 3, borderRadius: 3, minHeight: 300 }}>
+            <Typography variant="h5" fontWeight={600} gutterBottom color="secondary.main">
+              Your Cocktail List
+            </Typography>
+            <Stack spacing={2}>
+              {parseDrinks(selectedCocktails)?.map(renderSelectedCocktail)}
+            </Stack>
+          </Paper>
+        </Grid>
+      </Grid>
+    </Container>
   );
 }
 
