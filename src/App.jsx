@@ -263,7 +263,13 @@ function App() {
         }}
       />
       <Container maxWidth="lg" sx={{ py: 6, position: 'relative', zIndex: 1 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: { xs: 'space-between', md: 'center' }, 
+          alignItems: 'center', 
+          mb: 4,
+          position: 'relative'
+        }}>
           <Typography 
             variant="h3" 
             fontWeight={700} 
@@ -286,7 +292,9 @@ function App() {
                 color: '#1a237e',
                 '&:hover': {
                   backgroundColor: 'rgba(255, 255, 255, 1)',
-                }
+                },
+                position: { xs: 'static', md: 'absolute' },
+                right: 0
               }}
             >
               See Ingredients
